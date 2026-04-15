@@ -69,6 +69,7 @@ const scripts = [
   { name: 'dedup-tracker.mjs', expectExit: 0 },
   { name: 'merge-tracker.mjs', expectExit: 0 },
   { name: 'batch/provider-smoke-check.mjs', expectExit: 0 },
+  { name: 'batch/provider-integration-test.mjs', expectExit: 0 },
   { name: 'update-system.mjs check', expectExit: 0 },
 ];
 

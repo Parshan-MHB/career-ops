@@ -83,6 +83,7 @@ layer.
 
 ```bash
 npm run verify
+npm run test:providers
 
 # optional dashboard build
 cd dashboard && go build ./...
