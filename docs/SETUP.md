@@ -58,8 +58,9 @@ Then paste a job offer URL or description. Career-ops will automatically evaluat
 
 ## Agent Support Notes
 
-- Codex, Claude Code, and OpenCode all reuse the same checked-in `modes/*`, scripts, templates, and tracker flow.
+- Codex, Claude Code, and OpenCode all reuse the same checked-in `modes/*`, scripts, templates, tracker flow, and data contract.
 - Codex reads the root `AGENTS.md`; see [docs/CODEX.md](CODEX.md) for details.
+- Codex support targets parity with Claude Code at the repository-behavior level: same routing, same artifacts, same merge flow, same personalization boundaries.
 - The standalone batch runner supports Claude and Codex workers. Auto mode prefers Claude when both are installed; use `./batch/batch-runner.sh --provider codex` to force Codex.
 
 ## Available Commands

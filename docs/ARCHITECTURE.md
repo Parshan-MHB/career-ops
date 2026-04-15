@@ -66,12 +66,12 @@ batch-input.tsv    →  batch-runner.sh  →  N × provider workers
 
 Interactive workflows are agent-neutral: Codex, Claude Code, and OpenCode all route into the same `modes/*` files and local scripts.
 
-The batch runner is provider-aware. Each worker is a headless Claude or Codex run that receives the same `batch-prompt.md` contract and returns a structured JSON result. Both providers run in non-interactive auto-exec mode; Codex workers bypass the default Codex sandbox so Playwright PDF generation can launch Chromium successfully. Workers produce:
+The batch runner is provider-aware. Each worker is a headless Claude or Codex run that receives the same `batch-prompt.md` contract and returns a structured JSON result. Both providers run in non-interactive auto-exec mode; Codex workers bypass the default Codex sandbox so Playwright PDF generation can launch Chromium successfully. That launch detail is an implementation difference, not a repository-contract difference. Workers are expected to produce the same artifacts and state transitions:
 - Report .md
 - PDF
 - Tracker TSV line
 
-The orchestrator manages parallelism, state, retries, and resume.
+The orchestrator manages parallelism, state, retries, resume, and artifact recovery. If a worker creates the expected artifacts but fails to emit a final structured payload, the orchestrator recovers the run from those artifacts so Codex and Claude converge on the same repository outcome.
 
 ## Data Flow
 

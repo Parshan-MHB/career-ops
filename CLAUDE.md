@@ -43,7 +43,7 @@ To rollback: `node update-system.mjs rollback`
 
 ## What is career-ops
 
-AI-powered job search automation built on Claude Code: pipeline tracking, offer evaluation, CV generation, portal scanning, batch processing.
+AI-powered job search automation for agentic coding CLIs: pipeline tracking, offer evaluation, CV generation, portal scanning, and batch processing. Claude Code, Codex, and OpenCode should all reuse the same checked-in modes, scripts, templates, tracker flow, and data contract.
 
 ### Main Files
 
@@ -66,7 +66,7 @@ AI-powered job search automation built on Claude Code: pipeline tracking, offer 
 | `liveness-core.mjs` | Shared liveness logic (expired signals win over generic Apply text) |
 | `reports/` | Evaluation reports (format: `{###}-{company-slug}-{YYYY-MM-DD}.md`). Blocks A-F + G (Posting Legitimacy). Header includes `**Legitimacy:** {tier}`. |
 
-### OpenCode Commands
+### Interactive Command Surfaces
 
 When using [OpenCode](https://opencode.ai), the following slash commands are available (defined in `.opencode/commands/`):
 
@@ -88,7 +88,7 @@ When using [OpenCode](https://opencode.ai), the following slash commands are ava
 | `/career-ops-patterns` | `/career-ops patterns` | Analyze rejection patterns and improve targeting |
 | `/career-ops-followup` | `/career-ops followup` | Follow-up cadence tracker |
 
-**Note:** OpenCode commands invoke the same `.claude/skills/career-ops/SKILL.md` skill used by Claude Code. The `modes/*` files are shared between both platforms.
+**Parity rule:** OpenCode commands invoke the same `.claude/skills/career-ops/SKILL.md` skill used by Claude Code, and Codex routes into this file through `AGENTS.md`. The `modes/*` files, scripts, templates, and tracker flow are shared across all supported agents. Provider-specific CLI flags are implementation details only; the expected repository behavior and produced artifacts must stay the same.
 
 ### First Run — Onboarding (IMPORTANT)
 

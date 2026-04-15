@@ -4,6 +4,8 @@ Process multiple job offers in parallel via Claude or Codex workers. Each worker
 
 Provider note: the orchestrator runs both Claude and Codex workers in non-interactive auto-exec mode. For Codex, that means bypassing the default Codex sandbox so Playwright can launch Chromium for PDF generation. Use batch mode only in repositories and environments you trust.
 
+Parity note: provider-specific launch flags are implementation details only. Both providers are expected to produce the same repository-visible outcome: report, PDF, tracker TSV, merged tracker state, and resumable batch-state transitions.
+
 ## Quick Start
 
 1. **Add offers** to `batch-input.tsv` (tab-separated: `id`, `url`, `source`, `notes`):
@@ -64,6 +66,8 @@ batch/
 2. For each pending offer, it assigns a report number, resolves `batch-prompt.md`, and launches a worker for the selected provider.
 3. Each worker evaluates the offer, writes a report to `reports/`, generates a PDF to `output/`, writes a tracker TSV to `tracker-additions/`, and returns a structured JSON result.
 4. After all workers finish, batch-runner calls `merge-tracker.mjs` to merge TSVs into `data/applications.md` and runs `verify-pipeline.mjs` to check integrity.
+
+If a worker creates the expected artifacts but fails before emitting the final JSON payload, the orchestrator recovers the completion from those artifacts so the final repository state still matches the normal contract.
 
 ## Tracker Merge
 

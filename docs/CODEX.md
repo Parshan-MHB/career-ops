@@ -1,11 +1,11 @@
 # Codex Setup
 
-Career-Ops supports Codex for interactive workflows through the root `AGENTS.md` file.
+Career-Ops supports Codex through the root `AGENTS.md` file.
 
 If your Codex client reads project instructions automatically, `AGENTS.md`
 is enough for routing and behavior. Codex should reuse the same checked-in
-mode files, templates, tracker flow, and scripts that already power the
-Claude and OpenCode workflows.
+mode files, templates, tracker flow, scripts, and output contracts that
+already power the Claude and OpenCode workflows.
 
 ## Prerequisites
 
@@ -34,6 +34,19 @@ npx playwright install chromium
 - PDF generation and tracker maintenance
 - Repo customization through the shared `modes/*`, scripts, and templates
 - Batch processing through `batch/batch-runner.sh --provider codex`
+
+## Parity Goal
+
+Codex support is not meant to be a reduced path. The repository contract is:
+
+- the same routing and decision rules as Claude Code
+- the same `modes/*` and local scripts
+- the same report, PDF, tracker, and merge outputs
+- the same personalization boundaries from `DATA_CONTRACT.md`
+
+Provider-specific CLI flags, sandbox settings, and worker launch details are
+implementation details only. If Codex and Claude produce different repository
+behavior for the same request, treat that as a bug.
 
 Batch execution note: the standalone runner invokes Codex workers in non-interactive full-access mode so Playwright-backed PDF generation can succeed. Treat batch runs as trusted local automation, not as a sandboxed browsing mode.
 

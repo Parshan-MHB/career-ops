@@ -54,7 +54,7 @@ Career-Ops turns any AI coding CLI into a full job search command center. Instea
 
 > **Important: This is NOT a spray-and-pray tool.** Career-ops is a filter -- it helps you find the few offers worth your time out of hundreds. The system strongly recommends against applying to anything scoring below 4.0/5. Your time is valuable, and so is the recruiter's. Always review before submitting.
 
-Career-ops is agentic: Claude Code, Codex, and OpenCode can route into the same checked-in modes, scripts, and templates. Interactive runs can navigate career pages with Playwright, evaluate fit by reasoning about your CV vs the job description (not keyword matching), and adapt your resume per listing.
+Career-ops is agentic: Claude Code, Codex, and OpenCode route into the same checked-in modes, scripts, templates, and tracker flow. Interactive runs can navigate career pages with Playwright, evaluate fit by reasoning about your CV vs the job description (not keyword matching), and adapt your resume per listing.
 
 > **Heads up: the first evaluations won't be great.** The system doesn't know you yet. Feed it context -- your CV, your career story, your proof points, your preferences, what you're good at, what you want to avoid. The more you nurture it, the better it gets. Think of it as onboarding a new recruiter: the first week they need to learn about you, then they become invaluable.
 
@@ -114,10 +114,10 @@ See [docs/SETUP.md](docs/SETUP.md) for the full setup guide.
 
 | Agent | Status | Notes |
 |-------|--------|-------|
-| Codex | Supported for interactive workflows | Uses the root `AGENTS.md` and the shared `modes/*` + scripts |
-| Claude Code | Supported for interactive workflows | Uses `CLAUDE.md` + the same shared modes and scripts |
+| Codex | Supported for interactive workflows | Uses the root `AGENTS.md` to route into the same instructions, modes, scripts, and output contracts as Claude |
+| Claude Code | Supported for interactive workflows | Uses `CLAUDE.md` + the same shared modes, scripts, and output contracts as Codex |
 | OpenCode | Supported for interactive workflows | Uses `.opencode/commands/*` wrappers over the same shared modes |
-| Batch runner | Supported with Claude or Codex | `batch/batch-runner.sh` selects a worker provider via `--provider auto|claude|codex` |
+| Batch runner | Supported with Claude or Codex | `batch/batch-runner.sh` selects a worker provider via `--provider auto|claude|codex` and enforces the same report/PDF/tracker contract for both |
 
 ## Usage
 
