@@ -11,7 +11,7 @@ Use `modes/pt/` se pelo menos uma das condicoes abaixo for verdadeira:
 - Voce precisa de respostas e cartas de apresentacao em **portugues tech natural**, nao traduzido por maquina
 - Voce precisa lidar com **especificidades do mercado brasileiro**: CLT vs PJ, 13o salario, FGTS, PLR, vale-refeicao, plano de saude, aviso previo, periodo de experiencia
 
-Se a maioria das suas vagas e em ingles, fique com os modos padrao em `modes/`. Os modos em ingles funcionam automaticamente quando Claude detecta uma vaga em portugues — mas nao conhecem as particularidades do mercado brasileiro no mesmo nivel de detalhe.
+Se a maioria das suas vagas e em ingles, fique com os modos padrao em `modes/`. Os modos em ingles funcionam automaticamente quando o agente detecta uma vaga em portugues — mas nao conhecem as particularidades do mercado brasileiro no mesmo nivel de detalhe.
 
 ## Como ativar?
 
@@ -19,7 +19,7 @@ O career-ops nao tem um "switch de idioma" como flag de codigo. Em vez disso, ex
 
 ### Caminho 1 -- Por sessao, via comando
 
-Diga ao Claude no inicio da sessao:
+Diga ao agente no inicio da sessao:
 
 > "Use os modos em portugues de `modes/pt/`."
 
@@ -27,7 +27,7 @@ ou
 
 > "Avaliar e candidaturas em portugues -- use `modes/pt/_shared.md` e `modes/pt/oferta.md`."
 
-Claude vai ler os arquivos desta pasta em vez de `modes/`.
+O agente vai ler os arquivos desta pasta em vez de `modes/`.
 
 ### Caminho 2 -- Permanente, via perfil
 
@@ -39,7 +39,7 @@ language:
   modes_dir: modes/pt
 ```
 
-Lembre o Claude na primeira sessao de respeitar esse campo ("Olha no `profile.yml`, eu configurei `language.modes_dir`"). A partir dai, Claude usa automaticamente os modos em portugues.
+Lembre o agente na primeira sessao de respeitar esse campo ("Olha no `profile.yml`, eu configurei `language.modes_dir`"). A partir dai, o agente usa automaticamente os modos em portugues.
 
 > Nota: O campo `language.modes_dir` e uma convencao, nao um schema rigido. Se os mantenedores quiserem estruturar diferente, o campo pode ser renomeado a qualquer momento.
 

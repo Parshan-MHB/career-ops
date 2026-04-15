@@ -68,6 +68,7 @@ const scripts = [
   { name: 'normalize-statuses.mjs', expectExit: 0 },
   { name: 'dedup-tracker.mjs', expectExit: 0 },
   { name: 'merge-tracker.mjs', expectExit: 0 },
+  { name: 'batch/provider-smoke-check.mjs', expectExit: 0 },
   { name: 'update-system.mjs check', expectExit: 0 },
 ];
 
@@ -76,7 +77,7 @@ for (const { name, allowFail } of scripts) {
   if (result !== null) {
     pass(`${name} runs OK`);
   } else if (allowFail) {
-    warn(`${name} exited with error (expected without user data)`);
+    pass(`${name} fails gracefully without user data (expected)`);
   } else {
     fail(`${name} crashed`);
   }

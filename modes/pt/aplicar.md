@@ -4,7 +4,7 @@ Modo interativo para quando o candidato esta preenchendo um formulario de candid
 
 ## Requisitos
 
-- **Melhor com Playwright visivel**: No modo visivel, o candidato ve o navegador e Claude pode interagir com a pagina.
+- **Melhor com Playwright visivel**: No modo visivel, o candidato ve o navegador e o agente pode interagir com a pagina.
 - **Sem Playwright**: o candidato compartilha um screenshot ou cola as perguntas manualmente.
 
 ## Workflow

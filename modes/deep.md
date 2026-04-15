@@ -1,6 +1,6 @@
 # Modo: deep — Deep Research Prompt
 
-Genera un prompt estructurado para Perplexity/Claude/ChatGPT con 6 ejes:
+Genera un prompt estructurado para una herramienta de research externa (por ejemplo Perplexity, Codex, Claude o ChatGPT) con 6 ejes:
 
 ```
 ## Deep Research: [Empresa] — [Rol]

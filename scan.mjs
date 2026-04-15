@@ -7,7 +7,7 @@
  * filters from portals.yml, deduplicates against existing history,
  * and appends new offers to pipeline.md + scan-history.tsv.
  *
- * Zero Claude API tokens — pure HTTP + JSON.
+ * Zero agent tokens — pure HTTP + JSON.
  *
  * Usage:
  *   node scan.mjs                  # scan all enabled companies

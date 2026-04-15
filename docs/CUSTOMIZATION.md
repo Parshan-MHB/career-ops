@@ -51,7 +51,7 @@ The negotiation section provides frameworks for salary discussions. Replace the 
 
 ## Hooks (Optional)
 
-Career-ops can integrate with external systems via Claude Code hooks. Example hooks:
+Career-ops can integrate with external systems via Claude Code hooks if you are using Claude Code. Example hooks:
 
 ```json
 {
@@ -66,7 +66,9 @@ Career-ops can integrate with external systems via Claude Code hooks. Example ho
 }
 ```
 
-Save hooks in `.claude/settings.json`.
+Save Claude-specific hooks in `.claude/settings.json`.
+
+Codex support in this repo is driven by `AGENTS.md`, the shared modes, and the local scripts. Do not add a separate Codex-only customization layer unless you are intentionally extending provider-specific ergonomics.
 
 ## States (templates/states.yml)
 
