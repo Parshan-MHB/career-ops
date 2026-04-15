@@ -51,7 +51,7 @@ Career-Ops transforma qualquer CLI de código com IA em uma central completa de 
 
 > **Importante: isso NÃO é uma ferramenta de disparo em massa.** Career-ops é um filtro -- ajuda você a encontrar as poucas vagas que realmente valem seu tempo entre centenas. O sistema recomenda fortemente não se candidatar a nada com nota abaixo de 4.0/5. Seu tempo é valioso, e o do recrutador também. Sempre revise antes de enviar.
 
-Career-ops é agentic: Claude Code navega páginas de carreira com Playwright, avalia aderência comparando seu CV com a descrição da vaga (não por simples correspondência de palavras-chave) e adapta seu currículo para cada vaga.
+Career-ops é agentic: Codex, Claude Code e OpenCode entram no mesmo conjunto versionado de modos, scripts, templates e fluxo de tracker. Nas execuções interativas, o agente pode navegar páginas de carreira com Playwright, avaliar aderência comparando seu CV com a descrição da vaga (não por simples correspondência de palavras-chave) e adaptar seu currículo para cada vaga.
 
 > **Aviso: as primeiras avaliações não vão ser ótimas.** O sistema ainda não conhece você. Dê contexto -- seu CV, sua trajetória profissional, suas provas de resultado, suas preferências, no que você é bom e o que quer evitar. Quanto mais você alimenta, melhor ele fica. Pense nisso como o onboarding de um novo recrutador: na primeira semana ele precisa te conhecer, depois se torna indispensável.
 
@@ -90,10 +90,10 @@ cp templates/portals.example.yml portals.yml       # Personalize as empresas
 # 4. Adicione seu CV
 # Crie cv.md na raiz do projeto com seu CV em markdown
 
-# 5. Personalize com Claude
-claude   # Abra o Claude Code neste diretório
+# 5. Personalize com seu agente
+codex    # ou: claude
 
-# Depois, peça ao Claude para adaptar o sistema para você:
+# Depois, peça ao seu agente para adaptar o sistema para você:
 # "Mude os arquétipos para vagas de engenharia backend"
 # "Traduza os modos para português"
 # "Adicione estas 5 empresas ao portals.yml"
@@ -103,7 +103,7 @@ claude   # Abra o Claude Code neste diretório
 # Cole a URL de uma vaga ou rode /career-ops
 ```
 
-> **O sistema foi projetado para ser customizado pelo próprio Claude.** Modos, arquétipos, pesos de pontuação, scripts de negociação -- é só pedir para ele alterar. Ele lê os mesmos arquivos que usa, então sabe exatamente o que editar.
+> **O sistema foi projetado para ser customizado pelo agente que você usar.** Modos, arquétipos, pesos de pontuação e scripts de negociação -- é só pedir. Codex, Claude Code e OpenCode leem os mesmos arquivos que usam, então sabem exatamente o que editar.
 
 Veja [docs/SETUP.md](docs/SETUP.md) para o guia completo de configuração.
 
@@ -181,7 +181,8 @@ Recursos: 6 abas de filtro, 4 modos de ordenação, visualização agrupada/plan
 
 ```
 career-ops/
-├── CLAUDE.md                    # Instruções para o agente
+├── AGENTS.md                    # Ponto de entrada do Codex
+├── CLAUDE.md                    # Instruções compartilhadas do projeto
 ├── cv.md                        # Seu CV (crie este arquivo)
 ├── article-digest.md            # Seus proof points (opcional)
 ├── config/
@@ -211,13 +212,14 @@ career-ops/
 
 ## Stack de tecnologia
 
+![Codex](https://img.shields.io/badge/Codex-6B7280?style=flat&logo=openai&logoColor=white)
 ![Claude Code](https://img.shields.io/badge/Claude_Code-000?style=flat&logo=anthropic&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white)
 ![Go](https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white)
 ![Bubble Tea](https://img.shields.io/badge/Bubble_Tea-FF75B5?style=flat&logo=go&logoColor=white)
 
-- **Agente**: Claude Code com skills e modos customizados
+- **Agentes**: Codex, Claude Code e OpenCode sobre os mesmos modos e scripts versionados
 - **PDF**: Playwright/Puppeteer + template HTML
 - **Scanner**: Playwright + Greenhouse API + WebSearch
 - **Dashboard**: Go + Bubble Tea + Lipgloss (tema Catppuccin Mocha)

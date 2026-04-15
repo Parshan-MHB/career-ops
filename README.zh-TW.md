@@ -54,7 +54,7 @@ Career-Ops 能將任何 AI 程式碼 CLI 轉化為完整的求職指揮中心。
 
 > **重要：這不是廣撒網的工具。** career-ops 是一個篩選器 — 它幫助你從數百份職缺中找出真正值得投入的少數機會。本系統強烈建議不要應徵評分低於 4.0/5 的職缺。你的時間很寶貴，招募人員的時間也是。送出前務必仔細審閱。
 
-career-ops 具有代理能力：Claude Code 透過 Playwright 瀏覽求職頁面，藉由推理你的履歷與職缺描述的契合度（而非關鍵字比對）進行評估，並針對每份職缺調整你的履歷。
+career-ops 具有代理能力：Codex、Claude Code 與 OpenCode 都會路由到同一套版本控管中的模式、腳本、範本與追蹤流程。互動式執行時，代理可以透過 Playwright 瀏覽求職頁面，藉由推理你的履歷與職缺描述的契合度（而非關鍵字比對）進行評估，並針對每份職缺調整你的履歷。
 
 > **注意：最初幾次評估的品質可能不盡理想。** 因為系統還不了解你。請提供更多背景資訊 — 你的履歷、職涯故事、成就佐證、個人偏好、你的專長以及希望避免的事情。你餵給它的資訊越多，它就越準確。把它當作招募新人的招募顧問：第一週需要學習認識你，之後就會成為不可或缺的夥伴。
 
@@ -93,10 +93,10 @@ cp templates/portals.example.yml portals.yml       # 自訂目標企業
 # 4. 加入你的履歷
 # 在專案根目錄建立 cv.md，以 Markdown 格式撰寫你的履歷
 
-# 5. 透過 Claude 個人化設定
-claude   # 在此目錄開啟 Claude Code
+# 5. 透過你的代理個人化設定
+codex    # 或者：claude
 
-# 然後請 Claude 幫你調整系統：
+# 然後請你的代理幫你調整系統：
 # 「把職位類型改成後端工程師相關職缺」
 # 「把模式翻譯成繁體中文」
 # 「把這 5 家公司加入 portals.yml」
@@ -106,7 +106,7 @@ claude   # 在此目錄開啟 Claude Code
 # 貼上職缺 URL 或執行 /career-ops
 ```
 
-> **這個系統設計上就是讓 Claude 來客製化的。** 模式、職位類型、評分權重、談判腳本 — 直接告訴 Claude 要修改什麼，它就會動手。Claude 讀取的是它自己使用的相同檔案，所以它確切知道要編輯哪裡。
+> **這個系統設計上就是讓你使用的代理來客製化。** 模式、職位類型、評分權重、談判腳本 — 直接告訴 Codex、Claude Code 或 OpenCode 要修改什麼，它們就會動手。這些代理讀取的是它們自己會使用的同一批檔案，所以能準確知道該改哪裡。
 
 完整設定指南請參閱 [docs/SETUP.md](docs/SETUP.md)。
 
@@ -184,7 +184,8 @@ go build -o career-dashboard .
 
 ```
 career-ops/
-├── CLAUDE.md                    # 代理指令
+├── AGENTS.md                    # Codex 入口
+├── CLAUDE.md                    # 共用專案指令
 ├── cv.md                        # 你的履歷（需自行建立）
 ├── article-digest.md            # 你的成就佐證（選填）
 ├── config/
@@ -214,13 +215,14 @@ career-ops/
 
 ## 技術堆疊
 
+![Codex](https://img.shields.io/badge/Codex-6B7280?style=flat&logo=openai&logoColor=white)
 ![Claude Code](https://img.shields.io/badge/Claude_Code-000?style=flat&logo=anthropic&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white)
 ![Go](https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white)
 ![Bubble Tea](https://img.shields.io/badge/Bubble_Tea-FF75B5?style=flat&logo=go&logoColor=white)
 
-- **代理**：Claude Code，附自訂技能與模式
+- **代理**：Codex、Claude Code 與 OpenCode 共用相同的已提交模式與腳本
 - **PDF**：Playwright/Puppeteer + HTML 範本
 - **掃描器**：Playwright + Greenhouse API + WebSearch
 - **儀表板**：Go + Bubble Tea + Lipgloss（Catppuccin Mocha 主題）

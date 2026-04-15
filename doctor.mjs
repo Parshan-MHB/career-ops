@@ -6,7 +6,7 @@
  */
 
 import { existsSync, mkdirSync, readdirSync } from 'fs';
-import { join, dirname } from 'path';
+import { join, dirname, delimiter } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -17,6 +17,40 @@ const isTTY = process.stdout.isTTY;
 const green = (s) => isTTY ? `\x1b[32m${s}\x1b[0m` : s;
 const red = (s) => isTTY ? `\x1b[31m${s}\x1b[0m` : s;
 const dim = (s) => isTTY ? `\x1b[2m${s}\x1b[0m` : s;
+
+function detectCli(command) {
+  const pathVar = process.env.PATH || '';
+  const dirs = pathVar.split(delimiter).filter(Boolean);
+  for (const dir of dirs) {
+    const candidate = join(dir, command);
+    if (existsSync(candidate)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function checkSupportedAgentCli() {
+  const available = [
+    ['codex', 'Codex'],
+    ['claude', 'Claude Code'],
+    ['opencode', 'OpenCode'],
+  ].filter(([bin]) => detectCli(bin));
+
+  if (available.length > 0) {
+    const labels = available.map(([, label]) => label).join(', ');
+    return { pass: true, label: `Supported coding agent CLI found (${labels})` };
+  }
+
+  return {
+    pass: false,
+    label: 'No supported coding agent CLI found',
+    fix: [
+      'Install one supported agent CLI: Codex, Claude Code, or OpenCode',
+      'See docs/SETUP.md for setup details',
+    ],
+  };
+}
 
 function checkNodeVersion() {
   const major = parseInt(process.versions.node.split('.')[0]);
@@ -155,6 +189,7 @@ async function main() {
 
   const checks = [
     checkNodeVersion(),
+    checkSupportedAgentCli(),
     checkDependencies(),
     await checkPlaywright(),
     checkCv(),
@@ -186,7 +221,7 @@ async function main() {
     console.log(`Result: ${failures} issue${failures === 1 ? '' : 's'} found. Fix them and run \`npm run doctor\` again.`);
     process.exit(1);
   } else {
-    console.log('Result: All checks passed. You\'re ready to go! Run `codex` or `claude` to start.');
+    console.log('Result: All checks passed. You\'re ready to go! Run `codex`, `claude`, or `opencode` to start.');
     console.log('');
     console.log('Join the community: https://discord.gg/8pRpHETxa4');
     process.exit(0);

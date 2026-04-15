@@ -89,10 +89,10 @@ cp templates/portals.example.yml portals.yml       # Personalizar empresas
 # 4. Añadir tu CV
 # Crear cv.md en la raiz del proyecto con tu CV en markdown
 
-# 5. Personalizar con Claude
-claude   # Abrir Claude Code en este directorio
+# 5. Personalizar con tu agente
+codex    # o: claude
 
-# Pidele a Claude que adapte el sistema a ti:
+# Pidele a tu agente que adapte el sistema a ti:
 # "Cambia los arquetipos a roles de backend"
 # "Traduce los modes a ingles"
 # "Añade estas empresas a portals.yml"
@@ -102,7 +102,7 @@ claude   # Abrir Claude Code en este directorio
 # Pega una URL de oferta o ejecuta /career-ops
 ```
 
-> **El sistema esta diseñado para que Claude lo personalice.** Modes, arquetipos, scoring, scripts de negociacion -- solo pidelo. Claude lee los mismos archivos que usa, asi que sabe exactamente que editar.
+> **El sistema esta diseñado para que el agente que uses lo personalice.** Modes, arquetipos, scoring y scripts de negociacion -- solo pidelo. Codex, Claude Code y OpenCode leen los mismos archivos que usan, asi que saben exactamente que editar.
 
 Guia completa en [docs/SETUP.md](docs/SETUP.md).
 
@@ -178,7 +178,8 @@ Features: 6 pestañas de filtro, 4 modos de ordenacion, vista agrupada/plana, pr
 
 ```
 career-ops/
-├── CLAUDE.md                    # Instrucciones del agente
+├── AGENTS.md                    # Punto de entrada para Codex
+├── CLAUDE.md                    # Instrucciones compartidas del proyecto
 ├── cv.md                        # Tu CV (crealo tu)
 ├── article-digest.md            # Tus proof points (opcional)
 ├── config/
@@ -208,13 +209,14 @@ career-ops/
 
 ## Tech Stack
 
+![Codex](https://img.shields.io/badge/Codex-6B7280?style=flat&logo=openai&logoColor=white)
 ![Claude Code](https://img.shields.io/badge/Claude_Code-000?style=flat&logo=anthropic&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white)
 ![Go](https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white)
 ![Bubble Tea](https://img.shields.io/badge/Bubble_Tea-FF75B5?style=flat&logo=go&logoColor=white)
 
-- **Agente**: Claude Code con skills y modos personalizados
+- **Agentes**: Codex, Claude Code y OpenCode sobre los mismos modes y scripts versionados
 - **PDF**: Playwright/Puppeteer + template HTML
 - **Scanner**: Playwright + Greenhouse API + WebSearch
 - **Dashboard**: Go + Bubble Tea + Lipgloss (tema Catppuccin Mocha)

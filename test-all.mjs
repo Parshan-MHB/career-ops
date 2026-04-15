@@ -138,7 +138,8 @@ console.log('\n5. Data contract validation');
 
 // Check system files exist
 const systemFiles = [
-  'CLAUDE.md', 'VERSION', 'DATA_CONTRACT.md',
+  'AGENTS.md', 'CLAUDE.md', 'VERSION', 'DATA_CONTRACT.md',
+  'docs/CODEX.md',
   'modes/_shared.md', 'modes/_profile.template.md',
   'modes/oferta.md', 'modes/pdf.md', 'modes/scan.md',
   'templates/states.yml', 'templates/cv-template.html',
@@ -182,7 +183,7 @@ const scanExtensions = ['md', 'yml', 'html', 'mjs', 'sh', 'go', 'json'];
 const allowedFiles = [
   // English README + localized translations (all legitimately credit Santiago)
   'README.md', 'README.es.md', 'README.ja.md', 'README.ko-KR.md',
-  'README.pt-BR.md', 'README.ru.md',
+  'README.pt-BR.md', 'README.ru.md', 'README.zh-TW.md',
   // Standard project files
   'LICENSE', 'CITATION.cff', 'CONTRIBUTING.md',
   'package.json', '.github/FUNDING.yml', 'CLAUDE.md', 'go.mod', 'test-all.mjs',
@@ -191,6 +192,7 @@ const allowedFiles = [
   '.github/SECURITY.md',
   // Dashboard credit string
   'dashboard/internal/ui/screens/pipeline.go',
+  'dashboard/internal/ui/screens/progress.go',
 ];
 
 // Build pathspec for git grep — only scan tracked files matching these
@@ -281,9 +283,44 @@ for (const section of requiredSections) {
   }
 }
 
-// ── 10. VERSION FILE ─────────────────────────────────────────────
+// ── 10. AGENTS.md + CODEX.md INTEGRITY ───────────────────────────
 
-console.log('\n10. Version file');
+console.log('\n10. AGENTS.md + CODEX.md integrity');
+
+const agents = readFile('AGENTS.md');
+const codexDoc = readFile('docs/CODEX.md');
+
+const requiredAgentPhrases = [
+  'Read `CLAUDE.md`',
+  'They apply equally to Codex',
+  'For Codex-specific setup, see `docs/CODEX.md`',
+];
+
+for (const phrase of requiredAgentPhrases) {
+  if (agents.includes(phrase)) {
+    pass(`AGENTS.md includes: ${phrase}`);
+  } else {
+    fail(`AGENTS.md missing: ${phrase}`);
+  }
+}
+
+const requiredCodexPhrases = [
+  'Career-Ops supports Codex through the root `AGENTS.md` file.',
+  'the same report, PDF, tracker, and merge outputs',
+  'If Codex and Claude produce different repository',
+];
+
+for (const phrase of requiredCodexPhrases) {
+  if (codexDoc.includes(phrase)) {
+    pass(`docs/CODEX.md includes: ${phrase}`);
+  } else {
+    fail(`docs/CODEX.md missing: ${phrase}`);
+  }
+}
+
+// ── 11. VERSION FILE ─────────────────────────────────────────────
+
+console.log('\n11. Version file');
 
 if (fileExists('VERSION')) {
   const version = readFile('VERSION').trim();

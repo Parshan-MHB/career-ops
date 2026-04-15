@@ -6,6 +6,7 @@
 > Компании используют ИИ для фильтрации кандидатов. **Я дал кандидатам ИИ, чтобы *выбирать* компании.**
 > *Теперь это open source.*
 
+[![Codex](https://img.shields.io/badge/Codex-6B7280?style=flat&logo=openai&logoColor=white)](https://openai.com)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-000?style=flat&logo=anthropic&logoColor=white)](https://claude.ai)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Go](https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
@@ -60,10 +61,10 @@ cp templates/portals.example.yml portals.yml       # Настрой компан
 # 4. Добавь своё CV
 # Создай cv.md в корне проекта с резюме в формате Markdown
 
-# 5. Персонализируй через Claude
-claude   # Открой Claude Code в директории проекта
+# 5. Персонализируй через агента
+codex    # или: claude
 
-# Попроси Claude адаптировать систему:
+# Попроси выбранного агента адаптировать систему:
 # "Смени архетипы на backend-разработку PHP/Go"
 # "Переведи режимы на русский"  
 # "Добавь эти 5 компаний в portals.yml"
@@ -169,7 +170,8 @@ go build -o career-dashboard .
 
 ```
 career-ops/
-├── CLAUDE.md                    # Инструкции для агента
+├── AGENTS.md                    # Точка входа для Codex
+├── CLAUDE.md                    # Общие инструкции проекта
 ├── cv.md                        # Ваше CV (создайте)
 ├── config/
 │   └── profile.example.yml      # Шаблон профиля
@@ -197,7 +199,7 @@ career-ops/
 
 ## Технологии
 
-- **Агент**: Claude Code с кастомными навыками и режимами
+- **Агенты**: Codex, Claude Code и OpenCode поверх одних и тех же зафиксированных в репозитории режимов и скриптов
 - **PDF**: Playwright + HTML-шаблон
 - **Сканер**: Playwright + Greenhouse API + WebSearch
 - **Dashboard**: Go + Bubble Tea + Lipgloss (тема Catppuccin Mocha)
