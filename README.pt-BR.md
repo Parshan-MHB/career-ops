@@ -15,7 +15,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-000?style=flat&logo=anthropic&logoColor=white" alt="Claude Code">
   <img src="https://img.shields.io/badge/OpenCode-111827?style=flat&logo=terminal&logoColor=white" alt="OpenCode">
-  <img src="https://img.shields.io/badge/Codex_(soon)-6B7280?style=flat&logo=openai&logoColor=white" alt="Codex">
+  <img src="https://img.shields.io/badge/Codex-6B7280?style=flat&logo=openai&logoColor=white" alt="Codex">
   <img src="https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white" alt="Node.js">
   <img src="https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white" alt="Go">
   <img src="https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white" alt="Playwright">
@@ -67,7 +67,7 @@ Construído por alguém que usou isso para avaliar 740+ vagas, gerar 100+ CVs pe
 | **Scripts de negociação** | Frameworks para negociação salarial, resposta a desconto geográfico e alavanca com ofertas concorrentes |
 | **Geração de PDF ATS** | CVs com injeção de palavras-chave usando design com Space Grotesk + DM Sans |
 | **Scanner de portais** | 45+ empresas pré-configuradas (Anthropic, OpenAI, ElevenLabs, Retool, n8n...) + consultas customizadas em Ashby, Greenhouse, Lever e Wellfound |
-| **Processamento em lote** | Avaliação paralela com workers `claude -p` |
+| **Processamento em lote** | Avaliação paralela com o runner batch incluído (Claude ou Codex) |
 | **Dashboard TUI** | Interface no terminal para navegar, filtrar e ordenar seu pipeline |
 | **Humano no loop** | A IA avalia e recomenda, você decide e age. O sistema nunca envia candidatura automaticamente -- a decisão final é sempre sua |
 | **Integridade do pipeline** | Merge automatizado, deduplicação, normalização de status e health checks |

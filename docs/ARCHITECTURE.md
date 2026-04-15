@@ -4,8 +4,9 @@
 
 ```
                     ┌─────────────────────────────────┐
-                    │         Claude Code Agent        │
-                    │   (reads CLAUDE.md + modes/*.md) │
+                    │         AI Coding Agent          │
+                    │ (Codex / Claude / OpenCode UI)  │
+                    │  reads AGENTS.md / CLAUDE.md    │
                     └──────────┬──────────────────────┘
                                │
             ┌──────────────────┼──────────────────────┐
@@ -17,7 +18,7 @@
             │                  │                       │
             │           ┌──────▼──────┐          ┌────▼─────┐
             │           │ pipeline.md │          │ N workers│
-            │           │ (URL inbox) │          │ (claude -p)
+            │           │ (URL inbox) │          │ (Claude/Codex)
             │           └─────────────┘          └────┬─────┘
             │                                          │
      ┌──────▼──────────────────────────────────────────▼──────┐
@@ -56,14 +57,16 @@
 The batch system processes multiple offers in parallel:
 
 ```
-batch-input.tsv    →  batch-runner.sh  →  N × claude -p workers
+batch-input.tsv    →  batch-runner.sh  →  N × provider workers
 (id, url, source)     (orchestrator)       (self-contained prompt)
                            │
                     batch-state.tsv
                     (tracks progress)
 ```
 
-Each worker is a headless Claude instance (`claude -p`) that receives the full `batch-prompt.md` as context. Workers produce:
+Interactive workflows are agent-neutral: Codex, Claude Code, and OpenCode all route into the same `modes/*` files and local scripts.
+
+The batch runner is provider-aware. Each worker is a headless Claude or Codex run that receives the same `batch-prompt.md` contract and returns a structured JSON result. Both providers run in non-interactive auto-exec mode; Codex workers bypass the default Codex sandbox so Playwright PDF generation can launch Chromium successfully. Workers produce:
 - Report .md
 - PDF
 - Tracker TSV line

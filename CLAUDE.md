@@ -258,7 +258,7 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 2. `browser_snapshot` to read content
 3. Only footer/navbar without JD = closed. Title + description + Apply = active.
 
-**Exception for batch workers (`claude -p`):** Playwright is not available in headless pipe mode. Use WebFetch as fallback and mark the report header with `**Verification:** unconfirmed (batch mode)`. The user can verify manually later.
+**Exception for headless batch workers:** Playwright is not available in non-interactive worker mode. Use WebFetch or equivalent web tooling as fallback and mark the report header with `**Verification:** unconfirmed (batch mode)`. The user can verify manually later.
 
 ---
 

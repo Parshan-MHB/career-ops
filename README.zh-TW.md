@@ -15,7 +15,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-000?style=flat&logo=anthropic&logoColor=white" alt="Claude Code">
   <img src="https://img.shields.io/badge/OpenCode-111827?style=flat&logo=terminal&logoColor=white" alt="OpenCode">
-  <img src="https://img.shields.io/badge/Codex_(soon)-6B7280?style=flat&logo=openai&logoColor=white" alt="Codex">
+  <img src="https://img.shields.io/badge/Codex-6B7280?style=flat&logo=openai&logoColor=white" alt="Codex">
   <img src="https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white" alt="Node.js">
   <img src="https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white" alt="Go">
   <img src="https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white" alt="Playwright">
@@ -70,7 +70,7 @@ career-ops 具有代理能力：Claude Code 透過 Playwright 瀏覽求職頁面
 | **薪資談判腳本** | 薪資談判框架、地區薪資折扣反駁話術、競爭 Offer 運用策略 |
 | **ATS PDF 生成** | 注入關鍵字的履歷，採用 Space Grotesk + DM Sans 設計 |
 | **平台掃描器** | 預設超過 45 家企業（Anthropic、OpenAI、ElevenLabs、Retool、n8n...）+ 跨 Ashby、Greenhouse、Lever、Wellfound 的自訂查詢 |
-| **批次處理** | 使用 `claude -p` 工作器並行評估 |
+| **批次處理** | 使用內建批次執行器並行評估（Claude 或 Codex） |
 | **儀表板 TUI** | 在終端機 UI 中瀏覽、篩選及排序你的求職管道 |
 | **人機協作** | AI 負責評估與建議，你負責決策與行動。系統絕不自動送出應徵 — 最終決定永遠在你手上 |
 | **管道完整性** | 自動合併、去重、狀態正規化、健康檢查 |

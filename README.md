@@ -15,7 +15,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-000?style=flat&logo=anthropic&logoColor=white" alt="Claude Code">
   <img src="https://img.shields.io/badge/OpenCode-111827?style=flat&logo=terminal&logoColor=white" alt="OpenCode">
-  <img src="https://img.shields.io/badge/Codex_(soon)-6B7280?style=flat&logo=openai&logoColor=white" alt="Codex">
+  <img src="https://img.shields.io/badge/Codex-6B7280?style=flat&logo=openai&logoColor=white" alt="Codex">
   <img src="https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white" alt="Node.js">
   <img src="https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white" alt="Go">
   <img src="https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white" alt="Playwright">
@@ -54,7 +54,7 @@ Career-Ops turns any AI coding CLI into a full job search command center. Instea
 
 > **Important: This is NOT a spray-and-pray tool.** Career-ops is a filter -- it helps you find the few offers worth your time out of hundreds. The system strongly recommends against applying to anything scoring below 4.0/5. Your time is valuable, and so is the recruiter's. Always review before submitting.
 
-Career-ops is agentic: Claude Code navigates career pages with Playwright, evaluates fit by reasoning about your CV vs the job description (not keyword matching), and adapts your resume per listing.
+Career-ops is agentic: Claude Code, Codex, and OpenCode can route into the same checked-in modes, scripts, and templates. Interactive runs can navigate career pages with Playwright, evaluate fit by reasoning about your CV vs the job description (not keyword matching), and adapt your resume per listing.
 
 > **Heads up: the first evaluations won't be great.** The system doesn't know you yet. Feed it context -- your CV, your career story, your proof points, your preferences, what you're good at, what you want to avoid. The more you nurture it, the better it gets. Think of it as onboarding a new recruiter: the first week they need to learn about you, then they become invaluable.
 
@@ -70,7 +70,7 @@ Built by someone who used it to evaluate 740+ job offers, generate 100+ tailored
 | **Negotiation Scripts** | Salary negotiation frameworks, geographic discount pushback, competing offer leverage |
 | **ATS PDF Generation** | Keyword-injected CVs with Space Grotesk + DM Sans design |
 | **Portal Scanner** | 45+ companies pre-configured (Anthropic, OpenAI, ElevenLabs, Retool, n8n...) + custom queries across Ashby, Greenhouse, Lever, Wellfound |
-| **Batch Processing** | Parallel evaluation with `claude -p` workers |
+| **Batch Processing** | Parallel evaluation with the included provider-aware batch runner (Claude or Codex) |
 | **Dashboard TUI** | Terminal UI to browse, filter, and sort your pipeline |
 | **Human-in-the-Loop** | AI evaluates and recommends, you decide and act. The system never submits an application -- you always have the final call |
 | **Pipeline Integrity** | Automated merge, dedup, status normalization, health checks |
@@ -93,10 +93,10 @@ cp templates/portals.example.yml portals.yml       # Customize companies
 # 4. Add your CV
 # Create cv.md in the project root with your CV in markdown
 
-# 5. Personalize with Claude
-claude   # Open Claude Code in this directory
+# 5. Personalize with your coding agent
+codex    # or: claude
 
-# Then ask Claude to adapt the system to you:
+# Then ask your agent to adapt the system to you:
 # "Change the archetypes to backend engineering roles"
 # "Translate the modes to English"
 # "Add these 5 companies to portals.yml"
@@ -106,9 +106,18 @@ claude   # Open Claude Code in this directory
 # Paste a job URL or run /career-ops
 ```
 
-> **The system is designed to be customized by Claude itself.** Modes, archetypes, scoring weights, negotiation scripts -- just ask Claude to change them. It reads the same files it uses, so it knows exactly what to edit.
+> **The system is designed to be customized by the agent you use.** Modes, archetypes, scoring weights, negotiation scripts -- just ask Codex, Claude Code, or OpenCode to change them. They read the same files they use, so they know exactly what to edit.
 
 See [docs/SETUP.md](docs/SETUP.md) for the full setup guide.
+
+## Agent Support
+
+| Agent | Status | Notes |
+|-------|--------|-------|
+| Codex | Supported for interactive workflows | Uses the root `AGENTS.md` and the shared `modes/*` + scripts |
+| Claude Code | Supported for interactive workflows | Uses `CLAUDE.md` + the same shared modes and scripts |
+| OpenCode | Supported for interactive workflows | Uses `.opencode/commands/*` wrappers over the same shared modes |
+| Batch runner | Supported with Claude or Codex | `batch/batch-runner.sh` selects a worker provider via `--provider auto|claude|codex` |
 
 ## Usage
 
@@ -184,7 +193,8 @@ Features: 6 filter tabs, 4 sort modes, grouped/flat view, lazy-loaded previews, 
 
 ```
 career-ops/
-├── CLAUDE.md                    # Agent instructions
+├── AGENTS.md                    # Codex entrypoint
+├── CLAUDE.md                    # Shared project instructions for Claude Code
 ├── cv.md                        # Your CV (create this)
 ├── article-digest.md            # Your proof points (optional)
 ├── config/
@@ -214,17 +224,20 @@ career-ops/
 
 ## Tech Stack
 
+![Codex](https://img.shields.io/badge/Codex-6B7280?style=flat&logo=openai&logoColor=white)
 ![Claude Code](https://img.shields.io/badge/Claude_Code-000?style=flat&logo=anthropic&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white)
 ![Go](https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white)
 ![Bubble Tea](https://img.shields.io/badge/Bubble_Tea-FF75B5?style=flat&logo=go&logoColor=white)
 
-- **Agent**: Claude Code with custom skills and modes
+- **Agents**: Codex, Claude Code, and OpenCode on top of the same checked-in modes and scripts
 - **PDF**: Playwright/Puppeteer + HTML template
 - **Scanner**: Playwright + Greenhouse API + WebSearch
 - **Dashboard**: Go + Bubble Tea + Lipgloss (Catppuccin Mocha theme)
 - **Data**: Markdown tables + YAML config + TSV batch files
+
+Batch note: the included parallel batch runner is provider-aware. Auto mode prefers Claude for backward compatibility when both CLIs are installed; use `./batch/batch-runner.sh --provider codex` to force Codex workers.
 
 ## Also Open Source
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# career-ops batch runner — standalone orchestrator for claude -p workers
-# Reads batch-input.tsv, delegates each offer to a claude -p worker,
+# career-ops batch runner — standalone orchestrator for provider-backed workers
+# Reads batch-input.tsv, delegates each offer to a Claude or Codex worker,
 # tracks state in batch-state.tsv for resumability.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -11,6 +11,7 @@ BATCH_DIR="$SCRIPT_DIR"
 INPUT_FILE="$BATCH_DIR/batch-input.tsv"
 STATE_FILE="$BATCH_DIR/batch-state.tsv"
 PROMPT_FILE="$BATCH_DIR/batch-prompt.md"
+WORKER_SCHEMA_FILE="$BATCH_DIR/worker-result.schema.json"
 LOGS_DIR="$BATCH_DIR/logs"
 TRACKER_DIR="$BATCH_DIR/tracker-additions"
 REPORTS_DIR="$PROJECT_DIR/reports"
@@ -28,15 +29,19 @@ RETRY_FAILED=false
 START_FROM=0
 MAX_RETRIES=2
 MIN_SCORE=0
+PROVIDER="${CAREER_OPS_BATCH_PROVIDER:-auto}"
+SELECTED_PROVIDER=""
+WORKER_SCHEMA_JSON=""
 
 usage() {
   cat <<'USAGE'
-career-ops batch runner — process job offers in batch via claude -p workers
-Uses your default Claude model (Claude Max subscription).
+career-ops batch runner — process job offers in batch via Claude or Codex workers
+Auto mode preserves backward compatibility by preferring Claude when both CLIs are installed.
 
 Usage: batch-runner.sh [OPTIONS]
 
 Options:
+  --provider NAME     Worker provider: auto, claude, or codex (default: auto)
   --parallel N         Number of parallel workers (default: 1)
   --dry-run            Show what would be processed, don't execute
   --retry-failed       Only retry offers marked as "failed" in state
@@ -64,12 +69,16 @@ Examples:
 
   # Process 2 at a time starting from ID 10
   ./batch-runner.sh --parallel 2 --start-from 10
+
+  # Force Codex workers
+  ./batch-runner.sh --provider codex
 USAGE
 }
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --provider) PROVIDER="$2"; shift 2 ;;
     --parallel) PARALLEL="$2"; shift 2 ;;
     --dry-run) DRY_RUN=true; shift ;;
     --retry-failed) RETRY_FAILED=true; shift ;;
@@ -107,8 +116,46 @@ release_lock() {
 
 trap release_lock EXIT
 
+resolve_provider() {
+  case "$PROVIDER" in
+    auto)
+      if command -v claude &>/dev/null; then
+        SELECTED_PROVIDER="claude"
+      elif command -v codex &>/dev/null; then
+        SELECTED_PROVIDER="codex"
+      else
+        echo "ERROR: No supported batch worker CLI found. Install 'claude' or 'codex'."
+        exit 1
+      fi
+      ;;
+    claude|codex)
+      SELECTED_PROVIDER="$PROVIDER"
+      ;;
+    *)
+      echo "ERROR: Invalid provider '$PROVIDER'. Use auto, claude, or codex."
+      exit 1
+      ;;
+  esac
+}
+
+load_worker_schema() {
+  if [[ ! -f "$WORKER_SCHEMA_FILE" ]]; then
+    echo "ERROR: $WORKER_SCHEMA_FILE not found."
+    exit 1
+  fi
+
+  WORKER_SCHEMA_JSON=$(node -e 'const fs=require("fs"); process.stdout.write(JSON.stringify(JSON.parse(fs.readFileSync(process.argv[1], "utf8"))));' "$WORKER_SCHEMA_FILE" 2>/dev/null || true)
+  if [[ -z "$WORKER_SCHEMA_JSON" ]]; then
+    echo "ERROR: Failed to parse worker schema JSON at $WORKER_SCHEMA_FILE."
+    exit 1
+  fi
+}
+
 # Validate prerequisites
 check_prerequisites() {
+  resolve_provider
+  load_worker_schema
+
   if [[ ! -f "$INPUT_FILE" ]]; then
     echo "ERROR: $INPUT_FILE not found. Add offers first."
     exit 1
@@ -119,8 +166,8 @@ check_prerequisites() {
     exit 1
   fi
 
-  if ! command -v claude &>/dev/null; then
-    echo "ERROR: 'claude' CLI not found in PATH."
+  if ! command -v "$SELECTED_PROVIDER" &>/dev/null; then
+    echo "ERROR: '$SELECTED_PROVIDER' CLI not found in PATH."
     exit 1
   fi
 
@@ -304,6 +351,261 @@ reserve_report_num() {
   run_with_state_lock reserve_report_num_unlocked "$@"
 }
 
+resolve_project_path() {
+  local path="$1"
+  if [[ -z "$path" ]]; then
+    return 1
+  fi
+  if [[ "$path" = /* ]]; then
+    printf '%s\n' "$path"
+  else
+    printf '%s\n' "$PROJECT_DIR/$path"
+  fi
+}
+
+path_exists() {
+  local path="$1"
+  local resolved
+  resolved=$(resolve_project_path "$path" 2>/dev/null || true)
+  [[ -n "$resolved" && -f "$resolved" ]]
+}
+
+remove_if_exists() {
+  local path="$1"
+  local resolved
+  resolved=$(resolve_project_path "$path" 2>/dev/null || true)
+  if [[ -n "$resolved" && -e "$resolved" ]]; then
+    rm -f "$resolved"
+  fi
+}
+
+parse_worker_result() {
+  local result_file="$1"
+
+  node - "$result_file" <<'NODE'
+const fs = require('fs');
+const file = process.argv[2];
+const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+const clean = (value) => {
+  if (value === undefined || value === null) return '';
+  return String(value).replace(/\t/g, ' ').replace(/\r?\n/g, ' ');
+};
+process.stdout.write([
+  clean(data.status),
+  clean(data.score),
+  clean(data.report_path),
+  clean(data.pdf_path),
+  clean(data.tracker_path),
+  clean(data.error),
+].join('\t'));
+NODE
+}
+
+recover_worker_artifacts() {
+  local id="$1" report_num="$2"
+
+  node - "$PROJECT_DIR" "$id" "$report_num" <<'NODE'
+const fs = require('fs');
+const path = require('path');
+
+const [projectDir, batchId, expectedReportNum] = process.argv.slice(2);
+const reportsDir = path.join(projectDir, 'reports');
+
+if (!fs.existsSync(reportsDir)) process.exit(1);
+
+const clean = (value) => {
+  if (value === undefined || value === null) return '';
+  return String(value).replace(/\t/g, ' ').replace(/\r?\n/g, ' ').trim();
+};
+
+const files = fs.readdirSync(reportsDir)
+  .filter((name) => name.endsWith('.md') && !name.startsWith('.'))
+  .map((name) => {
+    const fullPath = path.join(reportsDir, name);
+    const stat = fs.statSync(fullPath);
+    return { name, fullPath, mtimeMs: stat.mtimeMs };
+  })
+  .sort((a, b) => b.mtimeMs - a.mtimeMs);
+
+let best = null;
+
+for (const file of files) {
+  const content = fs.readFileSync(file.fullPath, 'utf8');
+  const hasBatchId = new RegExp(`\\*\\*Batch ID:\\*\\*\\s*${batchId}\\b`).test(content);
+  const hasReportNum = file.name.startsWith(`${expectedReportNum}-`);
+
+  if (!hasBatchId && !hasReportNum) continue;
+
+  const titleMatch = content.match(/^#\s*Evaluaci[oó]n:\s*(.+?)\s+[—-]\s+(.+)$/m);
+  const scoreMatch = content.match(/^\*\*Score:\*\*\s*([0-9.]+)\/5/m);
+  const legitimacyMatch = content.match(/^\*\*Legitimacy:\*\*\s*(.+)$/m);
+  const pdfMatch = content.match(/^\*\*PDF:\*\*\s*(.+)$/m);
+  const reportNumMatch = file.name.match(/^(\d+)-/);
+
+  best = {
+    reportNum: reportNumMatch ? reportNumMatch[1] : expectedReportNum,
+    reportPath: path.relative(projectDir, file.fullPath),
+    pdfPath: pdfMatch ? clean(pdfMatch[1]) : '',
+    score: scoreMatch ? clean(scoreMatch[1]) : '',
+    company: titleMatch ? clean(titleMatch[1]) : 'Unknown Company',
+    role: titleMatch ? clean(titleMatch[2]) : 'Unknown Role',
+    legitimacy: legitimacyMatch ? clean(legitimacyMatch[1]) : '',
+  };
+  break;
+}
+
+if (!best) process.exit(1);
+
+process.stdout.write([
+  clean(best.reportNum),
+  clean(best.reportPath),
+  clean(best.pdfPath),
+  clean(best.score),
+  clean(best.company),
+  clean(best.role),
+  clean(best.legitimacy),
+].join('\t'));
+NODE
+}
+
+next_tracker_num() {
+  node - "$APPLICATIONS_FILE" <<'NODE'
+const fs = require('fs');
+const file = process.argv[2];
+const text = fs.readFileSync(file, 'utf8');
+const rows = text.split(/\r?\n/).filter((line) => /^\|\s*\d+\s*\|/.test(line));
+const nums = rows
+  .map((line) => parseInt(line.split('|')[1].trim(), 10))
+  .filter(Number.isFinite);
+process.stdout.write(String(nums.length ? Math.max(...nums) + 1 : 1));
+NODE
+}
+
+create_recovery_tracker() {
+  local id="$1" recovered_report_num="$2" report_path="$3" score="$4" company="$5" role="$6" legitimacy="$7" pdf_path="$8"
+  local tracker_path="batch/tracker-additions/${id}.tsv"
+  local next_num
+  next_num=$(next_tracker_num)
+  local pdf_emoji="❌"
+  if [[ -n "$pdf_path" ]] && path_exists "$pdf_path"; then
+    pdf_emoji="✅"
+  fi
+
+  local notes="Review report before applying."
+  case "$legitimacy" in
+    "Proceed with Caution")
+      notes="Validate company identity and compensation before applying."
+      ;;
+    "Suspicious")
+      notes="Do not apply until posting legitimacy is verified."
+      ;;
+    "High Confidence")
+      notes="Strong fit; review report and move quickly."
+      ;;
+  esac
+
+  printf '%s\t%s\t%s\t%s\t%s\t%s/5\t%s\t[%s](%s)\t%s\n' \
+    "$next_num" \
+    "$(date +%Y-%m-%d)" \
+    "$company" \
+    "$role" \
+    "Evaluated" \
+    "$score" \
+    "$pdf_emoji" \
+    "$recovered_report_num" \
+    "$report_path" \
+    "$notes" \
+    > "$PROJECT_DIR/$tracker_path"
+
+  printf '%s\n' "$tracker_path"
+}
+
+recover_offer_completion() {
+  local id="$1" report_num="$2"
+  local recovered=""
+  recovered=$(recover_worker_artifacts "$id" "$report_num" 2>/dev/null || true)
+  [[ -n "$recovered" ]] || return 1
+
+  local recovered_report_num recovered_report_path recovered_pdf_path recovered_score recovered_company recovered_role recovered_legitimacy
+  IFS=$'\t' read -r recovered_report_num recovered_report_path recovered_pdf_path recovered_score recovered_company recovered_role recovered_legitimacy <<< "$recovered"
+
+  [[ -n "$recovered_report_path" ]] || return 1
+  path_exists "$recovered_report_path" || return 1
+  [[ -n "$recovered_pdf_path" ]] || return 1
+  path_exists "$recovered_pdf_path" || return 1
+
+  local tracker_path="batch/tracker-additions/${id}.tsv"
+  if ! path_exists "$tracker_path"; then
+    tracker_path=$(create_recovery_tracker "$id" "$recovered_report_num" "$recovered_report_path" "$recovered_score" "$recovered_company" "$recovered_role" "$recovered_legitimacy" "$recovered_pdf_path")
+  fi
+
+  path_exists "$tracker_path" || return 1
+
+  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+    "$recovered_report_num" \
+    "$recovered_report_path" \
+    "$recovered_pdf_path" \
+    "$tracker_path" \
+    "$recovered_score" \
+    "$recovered_company" \
+    "$recovered_role"
+}
+
+run_claude_worker() {
+  local resolved_prompt="$1" prompt="$2" result_file="$3" log_file="$4"
+  local system_prompt
+  system_prompt=$(cat "$resolved_prompt")
+
+  claude -p \
+    --dangerously-skip-permissions \
+    --no-session-persistence \
+    --json-schema "$WORKER_SCHEMA_JSON" \
+    --append-system-prompt "$system_prompt" \
+    --add-dir /tmp \
+    "$prompt" \
+    > "$result_file" 2> "$log_file"
+}
+
+run_codex_worker() {
+  local resolved_prompt="$1" prompt="$2" result_file="$3" log_file="$4"
+  local worker_input_file="$5"
+
+  {
+    cat "$resolved_prompt"
+    printf '\n\n## Invocation Context\n\n%s\n' "$prompt"
+  } > "$worker_input_file"
+
+  codex exec \
+    --cd "$PROJECT_DIR" \
+    --dangerously-bypass-approvals-and-sandbox \
+    --ephemeral \
+    --skip-git-repo-check \
+    --add-dir /tmp \
+    --output-schema "$WORKER_SCHEMA_FILE" \
+    --output-last-message "$result_file" \
+    --json \
+    - \
+    < "$worker_input_file" \
+    > "$log_file" 2>&1
+}
+
+run_worker() {
+  local resolved_prompt="$1" prompt="$2" result_file="$3" log_file="$4" worker_input_file="$5"
+
+  case "$SELECTED_PROVIDER" in
+    claude)
+      run_claude_worker "$resolved_prompt" "$prompt" "$result_file" "$log_file"
+      ;;
+    codex)
+      run_codex_worker "$resolved_prompt" "$prompt" "$result_file" "$log_file" "$worker_input_file"
+      ;;
+    *)
+      echo "ERROR: Unsupported provider '$SELECTED_PROVIDER'"
+      return 1
+      ;;
+  esac
+}
+
 # Process a single offer
 process_offer() {
   local id="$1" url="$2" source="$3" notes="$4"
@@ -330,6 +632,8 @@ process_offer() {
   prompt="$prompt Batch ID: $id"
 
   local log_file="$LOGS_DIR/${report_num}-${id}.log"
+  local result_file="$LOGS_DIR/${report_num}-${id}.result.json"
+  local worker_input_file="$BATCH_DIR/.worker-input-${id}.md"
 
   # Prepare system prompt with placeholders resolved
   local resolved_prompt="$BATCH_DIR/.resolved-prompt-${id}.md"
@@ -350,41 +654,99 @@ process_offer() {
     -e "s|{{ID}}|${esc_id}|g" \
     "$PROMPT_FILE" > "$resolved_prompt"
 
-  # Launch claude -p worker (uses default model from Claude Max subscription)
   local exit_code=0
-  claude -p \
-    --dangerously-skip-permissions \
-    --append-system-prompt-file "$resolved_prompt" \
-    "$prompt" \
-    > "$log_file" 2>&1 || exit_code=$?
+  run_worker "$resolved_prompt" "$prompt" "$result_file" "$log_file" "$worker_input_file" || exit_code=$?
 
-  # Cleanup resolved prompt
+  # Cleanup transient prompt files
   rm -f "$resolved_prompt"
+  rm -f "$worker_input_file"
 
   local completed_at
   completed_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
   if [[ $exit_code -eq 0 ]]; then
-    # Try to extract score from worker output
-    local score="-"
-    local score_match
-   score_match=$(sed -nE 's/.*"score":[[:space:]]*([0-9.]+).*/\1/p' "$log_file" 2>/dev/null | head -1 || true)
-    if [[ -n "$score_match" ]]; then
-      score="$score_match"
+    local parsed_result
+    if ! parsed_result=$(parse_worker_result "$result_file" 2>/dev/null); then
+      local recovered_result
+      if recovered_result=$(recover_offer_completion "$id" "$report_num" 2>/dev/null); then
+        local recovered_report_num recovered_report_path recovered_pdf_path recovered_tracker_path recovered_score
+        IFS=$'\t' read -r recovered_report_num recovered_report_path recovered_pdf_path recovered_tracker_path recovered_score _ _ <<< "$recovered_result"
+        update_state "$id" "$url" "completed" "$started_at" "$completed_at" "$recovered_report_num" "$recovered_score" "-" "$retries"
+        echo "    ✅ Completed via artifact recovery (score: $recovered_score, report: $recovered_report_num)"
+        return 0
+      fi
+      retries=$((retries + 1))
+      update_state "$id" "$url" "failed" "$started_at" "$completed_at" "$report_num" "-" "invalid-worker-json" "$retries"
+      echo "    ❌ Failed (worker returned invalid JSON)"
+      return 0
+    fi
+
+    local result_status score report_path pdf_path tracker_path worker_error
+    IFS=$'\t' read -r result_status score report_path pdf_path tracker_path worker_error <<< "$parsed_result"
+
+    if [[ "$result_status" != "completed" ]]; then
+      local recovered_result
+      if recovered_result=$(recover_offer_completion "$id" "$report_num" 2>/dev/null); then
+        local recovered_report_num recovered_report_path recovered_pdf_path recovered_tracker_path recovered_score
+        IFS=$'\t' read -r recovered_report_num recovered_report_path recovered_pdf_path recovered_tracker_path recovered_score _ _ <<< "$recovered_result"
+        update_state "$id" "$url" "completed" "$started_at" "$completed_at" "$recovered_report_num" "$recovered_score" "-" "$retries"
+        echo "    ✅ Completed via artifact recovery (score: $recovered_score, report: $recovered_report_num)"
+        return 0
+      fi
+      retries=$((retries + 1))
+      local structured_error="${worker_error:-worker-reported-failure}"
+      update_state "$id" "$url" "failed" "$started_at" "$completed_at" "$report_num" "-" "$structured_error" "$retries"
+      echo "    ❌ Failed ($structured_error)"
+      return 0
+    fi
+
+    if ! path_exists "$report_path"; then
+      retries=$((retries + 1))
+      update_state "$id" "$url" "failed" "$started_at" "$completed_at" "$report_num" "-" "missing-report-artifact" "$retries"
+      echo "    ❌ Failed (missing report artifact)"
+      return 0
+    fi
+
+    if ! path_exists "$tracker_path"; then
+      retries=$((retries + 1))
+      update_state "$id" "$url" "failed" "$started_at" "$completed_at" "$report_num" "-" "missing-tracker-artifact" "$retries"
+      echo "    ❌ Failed (missing tracker artifact)"
+      return 0
+    fi
+
+    if [[ -n "$pdf_path" ]] && ! path_exists "$pdf_path"; then
+      retries=$((retries + 1))
+      update_state "$id" "$url" "failed" "$started_at" "$completed_at" "$report_num" "-" "missing-pdf-artifact" "$retries"
+      echo "    ❌ Failed (missing PDF artifact)"
+      return 0
+    fi
+
+    if [[ -z "${score:-}" ]]; then
+      score="-"
     fi
 
     # Check min-score gate
     if [[ "$score" != "-" && -n "$score" ]] && (( $(echo "$MIN_SCORE > 0" | bc -l) )); then
       if (( $(echo "$score < $MIN_SCORE" | bc -l) )); then
+        remove_if_exists "$tracker_path"
+        remove_if_exists "$pdf_path"
         update_state "$id" "$url" "skipped" "$started_at" "$completed_at" "$report_num" "$score" "below-min-score" "$retries"
         echo "    ⏭️  Skipped (score: $score < min-score: $MIN_SCORE)"
-        continue
+        return 0
       fi
     fi
 
     update_state "$id" "$url" "completed" "$started_at" "$completed_at" "$report_num" "$score" "-" "$retries"
     echo "    ✅ Completed (score: $score, report: $report_num)"
   else
+    local recovered_result
+    if recovered_result=$(recover_offer_completion "$id" "$report_num" 2>/dev/null); then
+      local recovered_report_num recovered_report_path recovered_pdf_path recovered_tracker_path recovered_score
+      IFS=$'\t' read -r recovered_report_num recovered_report_path recovered_pdf_path recovered_tracker_path recovered_score _ _ <<< "$recovered_result"
+      update_state "$id" "$url" "completed" "$started_at" "$completed_at" "$recovered_report_num" "$recovered_score" "-" "$retries"
+      echo "    ✅ Completed via artifact recovery (score: $recovered_score, report: $recovered_report_num)"
+      return 0
+    fi
     retries=$((retries + 1))
     local error_msg
     error_msg=$(tail -5 "$log_file" 2>/dev/null | tr '\n' ' ' | cut -c1-200 || echo "Unknown error (exit code $exit_code)")
@@ -461,6 +823,7 @@ main() {
   fi
 
   echo "=== career-ops batch runner ==="
+  echo "Provider: $SELECTED_PROVIDER (requested: $PROVIDER)"
   echo "Parallel: $PARALLEL | Max retries: $MAX_RETRIES"
   echo "Input: $total_input offers"
   echo ""

@@ -1,0 +1,57 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "id",
+    "report_num",
+    "company",
+    "company_slug",
+    "role",
+    "score",
+    "legitimacy",
+    "pdf_path",
+    "report_path",
+    "tracker_path",
+    "error"
+  ],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["completed", "failed"]
+    },
+    "id": {
+      "type": "string"
+    },
+    "report_num": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string"
+    },
+    "company_slug": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string"
+    },
+    "score": {
+      "type": ["number", "null"]
+    },
+    "legitimacy": {
+      "type": ["string", "null"]
+    },
+    "pdf_path": {
+      "type": ["string", "null"]
+    },
+    "report_path": {
+      "type": ["string", "null"]
+    },
+    "tracker_path": {
+      "type": ["string", "null"]
+    },
+    "error": {
+      "type": ["string", "null"]
+    }
+  }
+}

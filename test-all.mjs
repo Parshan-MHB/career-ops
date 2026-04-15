@@ -142,6 +142,7 @@ const systemFiles = [
   'modes/_shared.md', 'modes/_profile.template.md',
   'modes/oferta.md', 'modes/pdf.md', 'modes/scan.md',
   'templates/states.yml', 'templates/cv-template.html',
+  'batch/worker-result.schema.json',
   '.claude/skills/career-ops/SKILL.md',
 ];
 

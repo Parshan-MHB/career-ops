@@ -1,6 +1,8 @@
 # Batch Processing
 
-Process multiple job offers in parallel via `claude -p` workers. Each worker runs the full evaluation pipeline (A-F report + PDF + tracker line) autonomously.
+Process multiple job offers in parallel via Claude or Codex workers. Each worker runs the full evaluation pipeline (A-F report + PDF + tracker line) autonomously.
+
+Provider note: the orchestrator runs both Claude and Codex workers in non-interactive auto-exec mode. For Codex, that means bypassing the default Codex sandbox so Playwright can launch Chromium for PDF generation. Use batch mode only in repositories and environments you trust.
 
 ## Quick Start
 
@@ -24,13 +26,20 @@ Process multiple job offers in parallel via `claude -p` workers. Each worker run
    ./batch/batch-runner.sh
    ```
 
+   Force Codex explicitly if you do not want auto-selection:
+
+   ```bash
+   ./batch/batch-runner.sh --provider codex
+   ```
+
 4. **Results** are automatically merged into `data/applications.md` and verified with `verify-pipeline.mjs` at the end of the run.
 
 ## Options
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--parallel N` | `1` | Number of concurrent `claude -p` workers |
+| `--provider NAME` | `auto` | Worker provider: `auto`, `claude`, or `codex` |
+| `--parallel N` | `1` | Number of concurrent worker runs |
 | `--dry-run` | off | Preview pending offers without processing |
 | `--retry-failed` | off | Only retry offers marked as `failed` in state |
 | `--start-from N` | `0` | Skip offers with ID below N |
@@ -52,8 +61,8 @@ batch/
 ## How It Works
 
 1. **batch-runner.sh** reads `batch-input.tsv` and `batch-state.tsv` to determine which offers need processing.
-2. For each pending offer, it assigns a report number and launches a `claude -p` worker with `batch-prompt.md` as the system prompt (placeholders like `{{URL}}`, `{{REPORT_NUM}}` are resolved).
-3. Each worker evaluates the offer, writes a report to `reports/`, generates a PDF to `output/`, and writes a tracker TSV to `tracker-additions/`.
+2. For each pending offer, it assigns a report number, resolves `batch-prompt.md`, and launches a worker for the selected provider.
+3. Each worker evaluates the offer, writes a report to `reports/`, generates a PDF to `output/`, writes a tracker TSV to `tracker-additions/`, and returns a structured JSON result.
 4. After all workers finish, batch-runner calls `merge-tracker.mjs` to merge TSVs into `data/applications.md` and runs `verify-pipeline.mjs` to check integrity.
 
 ## Tracker Merge
@@ -75,6 +84,12 @@ A PID-based lock file (`batch-runner.pid`) prevents concurrent batch runs. If a 
 
 ## Prerequisites
 
-- `claude` CLI in PATH (Claude Max subscription for default model)
+- `claude` or `codex` CLI in PATH
 - Node.js >= 18, Playwright chromium installed (`npm run doctor` to verify)
 - `batch-input.tsv` with at least one offer
+
+## Provider Selection
+
+- `--provider auto` prefers Claude when both CLIs are installed, to preserve existing behavior.
+- `--provider claude` forces Claude workers.
+- `--provider codex` forces Codex workers.

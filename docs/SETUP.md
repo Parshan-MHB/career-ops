@@ -2,7 +2,10 @@
 
 ## Prerequisites
 
-- [Claude Code](https://claude.ai/code) installed and configured
+- One supported coding agent installed and configured:
+  - [Codex](https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan)
+  - [Claude Code](https://claude.ai/code)
+  - [OpenCode](https://opencode.ai)
 - Node.js 18+ (for PDF generation and utility scripts)
 - (Optional) Go 1.21+ (for the dashboard TUI)
 
@@ -44,13 +47,20 @@ Edit `portals.yml`:
 
 ### 5. Start using
 
-Open Claude Code in this directory:
+Open your coding agent in this directory:
 
 ```bash
-claude
+codex
+# or: claude
 ```
 
 Then paste a job offer URL or description. Career-ops will automatically evaluate it, generate a report, create a tailored PDF, and track it.
+
+## Agent Support Notes
+
+- Codex, Claude Code, and OpenCode all reuse the same checked-in `modes/*`, scripts, templates, and tracker flow.
+- Codex reads the root `AGENTS.md`; see [docs/CODEX.md](CODEX.md) for details.
+- The standalone batch runner supports Claude and Codex workers. Auto mode prefers Claude when both are installed; use `./batch/batch-runner.sh --provider codex` to force Codex.
 
 ## Available Commands
 

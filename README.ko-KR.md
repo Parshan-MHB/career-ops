@@ -15,7 +15,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-000?style=flat&logo=anthropic&logoColor=white" alt="Claude Code">
   <img src="https://img.shields.io/badge/OpenCode-111827?style=flat&logo=terminal&logoColor=white" alt="OpenCode">
-  <img src="https://img.shields.io/badge/Codex_(soon)-6B7280?style=flat&logo=openai&logoColor=white" alt="Codex">
+  <img src="https://img.shields.io/badge/Codex-6B7280?style=flat&logo=openai&logoColor=white" alt="Codex">
   <img src="https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white" alt="Node.js">
   <img src="https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white" alt="Go">
   <img src="https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white" alt="Playwright">
@@ -68,7 +68,7 @@ Career-ops는 에이전트 기반으로 작동합니다: Claude Code가 Playwrig
 | **협상 전략 스크립트** | 연봉 협상 프레임워크, 거주지 기반 연봉 차등(Geographic Discount) 대응 논리, 경쟁 오퍼 활용 전략 |
 | **ATS PDF 생성** | Space Grotesk + DM Sans 디자인, 키워드가 주입된 이력서 |
 | **포털 스캐너** | 45개 이상의 기업 사전 설정 (Anthropic, OpenAI, ElevenLabs, Retool, n8n 등) + Ashby, Greenhouse, Lever, Wellfound 전반의 커스텀 검색 |
-| **일괄 처리** | `claude -p` 워커로 병렬 평가 |
+| **일괄 처리** | 포함된 배치 러너(Claude 또는 Codex)로 병렬 평가 |
 | **Dashboard TUI** | 터미널 UI에서 파이프라인 탐색, 필터링, 정렬 |
 | **Human-in-the-Loop** | AI가 평가하고 추천하면, 당신이 판단하고 행동합니다. 시스템은 절대 지원서를 자동 제출하지 않습니다 -- 최종 결정은 항상 당신의 몫 |
 | **파이프라인 무결성** | 자동 병합, 중복 제거, 상태 정규화, 헬스 체크 |

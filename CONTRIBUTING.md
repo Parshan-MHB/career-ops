@@ -1,6 +1,6 @@
 # Contributing to Career-Ops
 
-Thanks for your interest in contributing! Career-Ops is built with Claude Code, and you can use it for development too.
+Thanks for your interest in contributing! Career-Ops is designed to work with Codex, Claude Code, and OpenCode for interactive development.
 
 ## Before Submitting a PR
 
@@ -41,7 +41,7 @@ PRs without a corresponding issue may be closed if they don't align with the pro
 
 ## Guidelines
 
-- Keep modes language-agnostic when possible (Claude handles both EN and ES)
+- Keep modes language-agnostic when possible (the shared prompt stack should work across supported agents)
 - Scripts should handle missing files gracefully (check `existsSync` before `readFileSync`)
 - Dashboard changes require `go build` — test with real data before submitting
 - Don't commit personal data (cv.md, profile.yml, applications.md, reports/)
@@ -61,10 +61,15 @@ npm run doctor                # Setup validation
 node verify-pipeline.mjs     # Health check
 node cv-sync-check.mjs        # Config check
 
+# Interactive agents
+codex                         # or: claude
+
 # Dashboard
 cd dashboard && go build -o career-dashboard .
 ./career-dashboard --path ..
 ```
+
+Note: the standalone batch runner now supports Claude and Codex. Auto mode prefers Claude for backward compatibility; use `./batch/batch-runner.sh --provider codex` to force Codex.
 
 ## Need Help?
 

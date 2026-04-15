@@ -1,11 +1,11 @@
 # Codex Setup
 
-Career-Ops supports Codex through the root `AGENTS.md` file.
+Career-Ops supports Codex for interactive workflows through the root `AGENTS.md` file.
 
 If your Codex client reads project instructions automatically, `AGENTS.md`
 is enough for routing and behavior. Codex should reuse the same checked-in
 mode files, templates, tracker flow, and scripts that already power the
-Claude workflow.
+Claude and OpenCode workflows.
 
 ## Prerequisites
 
@@ -27,6 +27,16 @@ npx playwright install chromium
 - `Scan my configured portals for new roles that match my profile.`
 - `Generate the tailored ATS PDF for this role using Career-Ops.`
 
+## What Works Today
+
+- Single-offer evaluation and the full auto-pipeline
+- Portal scan and pipeline inbox processing
+- PDF generation and tracker maintenance
+- Repo customization through the shared `modes/*`, scripts, and templates
+- Batch processing through `batch/batch-runner.sh --provider codex`
+
+Batch execution note: the standalone runner invokes Codex workers in non-interactive full-access mode so Playwright-backed PDF generation can succeed. Treat batch runs as trusted local automation, not as a sandboxed browsing mode.
+
 ## Routing Map
 
 | User intent | Files Codex should read |
@@ -43,7 +53,7 @@ npx playwright install chromium
 | Training / certification review | `modes/training.md` |
 | Project evaluation | `modes/project.md` |
 
-The key point: Codex support is additive. It should route into the existing
+The key point: Codex support is additive. It routes into the existing
 Career-Ops modes and scripts rather than introducing a parallel automation
 layer.
 
@@ -54,6 +64,7 @@ layer.
 - Never verify a job’s live status with generic web fetch when Playwright is available.
 - Never submit an application for the user.
 - Never add new tracker rows directly to `data/applications.md`; use the TSV addition flow and `merge-tracker.mjs`.
+- When using batch mode, prefer `./batch/batch-runner.sh --provider codex` if you want explicit Codex workers instead of auto-selection.
 
 ## Verification
 
@@ -63,3 +74,7 @@ npm run verify
 # optional dashboard build
 cd dashboard && go build ./...
 ```
+
+OpenAI references:
+- Codex terminal overview: https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan/
+- AGENTS.md behavior: https://openai.com/index/introducing-codex/
